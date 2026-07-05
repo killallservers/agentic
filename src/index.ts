@@ -34,13 +34,10 @@ async function runSetup(): Promise<void> {
     return
   }
 
-  // Confirm installation directory
-  const { readFileSync } = await import('fs')
-  const { resolve } = await import('path')
+  // Show installation directory
   const cwd = process.cwd()
-
-  console.log(`Current directory: ${cwd}`)
-  console.log('Files will be installed to .agentic/ in this directory.\n')
+  console.log(`Installing to: ${cwd}`)
+  console.log('Files will be created in .agentic/ and .claude/\n')
 
   const config = await getConfigFromUI()
   await continueSetup(config)
