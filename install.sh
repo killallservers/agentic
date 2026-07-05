@@ -9,7 +9,7 @@ echo "📍 Install location: $ORIGINAL_DIR"
 echo ""
 
 read -p "Is this the correct project directory? (y/n) " -n 1 -r
-echo
+echo ""
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
   read -p "Enter project path: " PROJECT_PATH
   if [[ ! -d "$PROJECT_PATH" ]]; then
