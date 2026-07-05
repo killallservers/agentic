@@ -91,7 +91,10 @@ src/                 # Setup CLI (TypeScript/Bun)
 ├── llm/             # LLM provider clients
 ├── prompts/         # Ink UI components
 ├── utils/           # Helper functions
-└── types.ts         # TypeScript interfaces
+├── types.ts         # TypeScript interfaces
+└── init/            # Scaffolding files
+    ├── core/        # Always installed (agents, workflows, rules, etc)
+    └── skills/      # Conditional (bun, drizzle, hono)
 
 package.json, tsconfig.json, bun.lockb  # Setup CLI dependencies
 ```
