@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "model": "claude-haiku-4-5",
+  "autoMemoryDirectory": "./.agentic/memory",
+  "autoMemoryEnabled": true,
+  "modelsByTask": {
+    "codeGeneration": "claude-haiku-4-5",
+    "codeReview": "claude-haiku-4-5",
+    "architecture": "claude-haiku-4-5",
+    "exploration": "claude-haiku-4-5",
+    "debugging": "claude-haiku-4-5"
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Bash(bun *)",
+      "Bash(cargo *)",
+      "Bash(go *)",
+      "Bash(uv *)",
+      "Bash(zig *)",
+      "Bash(git *)",
+      "Bash(grep *)",
+      "Grep",
+      "Glob",
+      "Skill"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./secrets)",
+      "Read(./keys)",
+      "Read(./certs)",
+      "Read(./credentials)",
+      "Bash(rm -rf *)",
+      "Bash(npm *)",
+      "Bash(sudo *)",
+      "Bash(chmod 777 *)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0"
+  },
+  "attribution": {
+    "commits": true,
+    "pullRequests": true
+  },
+  "spinnerTipsEnabled": false,
+  "language": "english",
+  "cleanupPeriodDays": 30
+}

@@ -1,0 +1,30 @@
+# Claude Code runtime/local files
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
+# .claude/skills/ are symlinks to .agentic/skills/ (actual files)
+.claude/skills/
+
+# Dependencies
+node_modules/
+bun.lockb
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+.next/
+
+# IDE
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Temporary
+/tmp/
+*.tmp
