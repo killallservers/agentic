@@ -12,6 +12,7 @@ interface LLMSetupProps {
 export function LLMSetup({ onComplete }: LLMSetupProps) {
   const [step, setStep] = useState<'provider' | 'model' | 'key'>('provider')
   const [config, setConfig] = useState<Partial<SetupConfig>>({})
+  const [apiKeyInput, setApiKeyInput] = useState('')
 
   const handleProviderSelect = (value: string) => {
     setConfig((prev: Partial<SetupConfig>) => ({ ...prev, provider: value }))
@@ -69,8 +70,8 @@ export function LLMSetup({ onComplete }: LLMSetupProps) {
       </Text>
       <TextInput
         placeholder="Paste your API key here..."
-        value=""
-        onChange={() => {}}
+        value={apiKeyInput}
+        onChange={setApiKeyInput}
         onSubmit={handleKeyInput}
         mask="*"
       />

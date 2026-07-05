@@ -21,7 +21,24 @@ async function main() {
 async function runSetup(): Promise<void> {
   console.log('\n🚀 Claude Code Agent Setup\n')
 
+  // Check for existing API key
+  const existingKey = readEnvKey('ANTHROPIC_API_KEY')
+  if (existingKey) {
+    console.log('✅ Found existing ANTHROPIC_API_KEY in .env\n')
+    const config: SetupConfig = {
+      provider: 'anthropic',
+      model: 'claude-opus-4-8',
+      apiKey: existingKey,
+    }
+    await continueSetup(config)
+    return
+  }
+
   const config = await getConfigFromUI()
+  await continueSetup(config)
+}
+
+async function continueSetup(config: SetupConfig): Promise<void> {
 
   console.log('\n✅ Validating API key...\n')
   const client = new LLMClient(config)
