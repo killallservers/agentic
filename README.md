@@ -14,8 +14,7 @@ This repository contains a curated collection of Claude Code agents and skills f
 ### Quick Start: Interactive Setup
 
 ```bash
-npm install @killallservers/agentic
-npx agentic setup
+curl -fsSL https://raw.githubusercontent.com/killallservers/agentic/main/setup.sh | bash
 ```
 
 The interactive CLI will:
@@ -28,22 +27,14 @@ The interactive CLI will:
 
 ### Manual Installation
 
-Or sync agents and skills to your project manually:
+Or clone and run locally:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/killallservers/skills/main/install.sh | bash
+git clone https://github.com/killallservers/agentic
+cd agentic
+bun install
+bun run dev setup
 ```
-
-Or with custom repository/branch:
-
-```bash
-REPO="your-org/your-repo" BRANCH="main" bash install.sh
-```
-
-The script will:
-- Sync agents and skills to your project
-- Create or update `.gitignore` with Claude Code runtime entries
-- Copy `TEMPLATE.md` to `README.md` if it doesn't exist
 
 ## For Workflow-Driven Teams
 
