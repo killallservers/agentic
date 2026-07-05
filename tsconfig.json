@@ -5,6 +5,7 @@
     "lib": ["ES2020"],
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
+    "types": ["bun", "react"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
