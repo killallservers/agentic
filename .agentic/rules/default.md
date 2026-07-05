@@ -16,3 +16,8 @@
 - ❌ Deployments (no vercel deploy, kubectl apply, etc.)
 - ❌ Database operations in production
 - ❌ Deleting files outside of build artifacts
+
+## Package Management
+- ✅ Add packages using `@latest` version specifier
+- ❌ Never guess or hardcode versions
+- When adding packages, always use: `bun add package@latest` or `npm install package@latest`
