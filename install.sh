@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 ORIGINAL_DIR=$(pwd)
@@ -8,18 +8,25 @@ echo "🚀 Claude Code Agent Setup"
 echo "📍 Install location: $ORIGINAL_DIR"
 echo ""
 
-read -p "Is this the correct project directory? (y/n) " -n 1 -r
+printf "Is this the correct project directory? (y/n) "
+read -r REPLY
 echo ""
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  read -p "Enter project path: " PROJECT_PATH
-  if [[ ! -d "$PROJECT_PATH" ]]; then
-    echo "❌ Directory does not exist: $PROJECT_PATH"
-    exit 1
-  fi
-  ORIGINAL_DIR="$PROJECT_PATH"
-  echo "✅ Using: $ORIGINAL_DIR"
-  echo ""
-fi
+
+case "$REPLY" in
+  [Yy])
+    ;;
+  *)
+    printf "Enter project path: "
+    read -r PROJECT_PATH
+    if [ ! -d "$PROJECT_PATH" ]; then
+      echo "❌ Directory does not exist: $PROJECT_PATH"
+      exit 1
+    fi
+    ORIGINAL_DIR="$PROJECT_PATH"
+    echo "✅ Using: $ORIGINAL_DIR"
+    echo ""
+    ;;
+esac
 
 TMPDIR=$(mktemp -d)
 trap "rm -rf $TMPDIR" EXIT
