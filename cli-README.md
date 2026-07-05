@@ -1,6 +1,6 @@
-# Claude Code Agent Setup CLI
+# Setup CLI
 
-Interactive setup wizard for configuring Claude Code agents and workflows.
+Interactive setup wizard for configuring Claude Code agents and workflows. Runs from project root.
 
 ## What It Does
 
@@ -14,6 +14,8 @@ Interactive setup wizard for configuring Claude Code agents and workflows.
 8. **Save configuration** to `.claude/config.json`
 
 ## Development
+
+From project root:
 
 ```bash
 # Install dependencies
