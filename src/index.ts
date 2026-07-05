@@ -6,6 +6,7 @@ import { LLMSetup } from './prompts/llm-setup'
 import { LLMClient } from './llm/client'
 import { SetupConfig } from './types'
 import { writeEnvKey, ensureGitignore, readEnvKey } from './utils/env'
+import { loadConfig } from './config'
 
 async function main() {
   const args = process.argv.slice(2)
@@ -20,6 +21,33 @@ async function main() {
 
 async function runSetup(): Promise<void> {
   console.log('\n🚀 Claude Code Agent Setup\n')
+
+  // Check for existing config file
+  const existingConfig = loadConfig()
+  if (existingConfig) {
+    console.log('✅ Found .config/agentic/config.toml')
+    console.log(`Using provider: ${existingConfig.llm.provider}`)
+    console.log(`Using model: ${existingConfig.llm.model}\n`)
+
+    // Get API key from environment
+    const apiKey = readEnvKey(
+      existingConfig.llm.provider === 'anthropic'
+        ? 'ANTHROPIC_API_KEY'
+        : 'OPENAI_API_KEY'
+    )
+    if (!apiKey) {
+      console.error('❌ API key not found in environment')
+      process.exit(1)
+    }
+
+    const config: SetupConfig = {
+      provider: existingConfig.llm.provider,
+      model: existingConfig.llm.model,
+      apiKey,
+    }
+    await continueSetup(config)
+    return
+  }
 
   // Check for existing API key
   const existingKey = readEnvKey('ANTHROPIC_API_KEY')
