@@ -92,9 +92,13 @@ src/                 # Setup CLI (TypeScript/Bun)
 ├── prompts/         # Ink UI components
 ├── utils/           # Helper functions
 ├── types.ts         # TypeScript interfaces
-└── init/            # Scaffolding files
-    ├── core/        # Always installed (agents, workflows, rules, etc)
-    └── skills/      # Conditional (bun, drizzle, hono)
+└── init/            # Scaffolding files to copy on install
+    ├── agents/      # Agent definitions
+    ├── workflows/   # Workflow templates
+    ├── rules/       # Security rules and patterns
+    ├── memory/      # Memory boilerplate
+    ├── hooks/       # Installation hooks
+    └── skills/      # Optional skills (bun, drizzle, hono)
 
 package.json, tsconfig.json, bun.lockb  # Setup CLI dependencies
 ```
