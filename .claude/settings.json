@@ -1,14 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "model": "claude-haiku-4-5",
-  "autoMemoryEnabled": true,
-  "modelsByTask": {
-    "codeGeneration": "claude-haiku-4-5",
-    "codeReview": "claude-haiku-4-5",
-    "architecture": "claude-haiku-4-5",
-    "exploration": "claude-haiku-4-5",
-    "debugging": "claude-haiku-4-5"
+  "cleanupPeriodDays": 30,
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0"
   },
+  "attribution": {},
   "permissions": {
     "allow": [
       "Read",
@@ -37,17 +33,18 @@
       "Bash(chmod 777 *)"
     ]
   },
-  "env": {
-    "CLAUDE_CODE_ENABLE_TELEMETRY": "0"
-  },
-  "attribution": {
-    "commits": true,
-    "pullRequests": true
-  },
-  "spinnerTipsEnabled": false,
+  "model": "claude-haiku-4-5",
   "language": "english",
-  "cleanupPeriodDays": 30,
-  "hooks": {
-    "post_write": ".agentic/hooks/symlink-to-claude.sh"
+  "spinnerTipsEnabled": false,
+  "autoMemoryEnabled": true,
+  "modelsByTask": {
+    "codeGeneration": "claude-haiku-4-5",
+    "codeReview": "claude-haiku-4-5",
+    "architecture": "claude-haiku-4-5",
+    "exploration": "claude-haiku-4-5",
+    "debugging": "claude-haiku-4-5"
+  },
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true
   }
 }

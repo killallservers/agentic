@@ -29,18 +29,40 @@ Bun is a fast, all-in-one JavaScript runtime and toolchain built in Rust. It rep
 - **bun.lock** — Deterministic lockfile for reproducible installs
 - **package.json** — Dependencies, scripts, workspace definitions (same as Node.js)
 
+## Standard package.json Scripts
+
+**Always include these four scripts in package.json.** These are the standard Bun development and production commands:
+
+```json
+{
+  "scripts": {
+    "dev": "bun run src/index.ts --watch",
+    "build": "bun build ./src/index.ts --outdir ./dist --minify",
+    "start": "bun dist/index.js",
+    "test": "bun test"
+  }
+}
+```
+
+- `dev`: Development server with hot reload
+- `build`: Production build (minified, bundled)
+- `start`: Run production build
+- `test`: Run test suite
+
 ## Quick Commands Reference
 
 | Task | Command |
 |------|---------|
+| Run development | `bun run dev` |
+| Run build | `bun run build` |
+| Run production | `bun run start` |
+| Run tests | `bun run test` or `bun test` |
 | Run a file | `bun run file.ts` or `bun file.ts` |
-| Run a script | `bun run dev` (from package.json scripts) |
 | Install deps | `bun install` |
 | Add package | `bun add package-name` |
 | Add dev dep | `bun add -d package-name` |
 | Add workspace dep | `bun add -w @workspace/lib` |
 | Remove package | `bun remove package-name` |
-| Run tests | `bun test` |
 | Build bundle | `bun build ./src/index.ts --outdir ./dist` |
 | Build executable | `bun build ./src/cli.ts --target executable --outfile cli` |
 | Watch mode | `bun --watch run file.ts` or `bun build --watch` |

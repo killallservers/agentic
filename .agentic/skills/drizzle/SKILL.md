@@ -126,19 +126,39 @@ const postsWithComments = await db.query.posts.findMany({
 });
 ```
 
+## Standard package.json Scripts
+
+**Always include these four scripts in package.json.** These are the standard Drizzle Kit commands:
+
+```json
+{
+  "scripts": {
+    "db:pull": "drizzle-kit pull",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  }
+}
+```
+
+- `db:pull`: Introspect database and update schema (when database is source of truth)
+- `db:push`: Push schema changes to development database
+- `db:generate`: Generate migrations from schema changes
+- `db:migrate`: Apply migrations in production
+
 ### Migrations with Drizzle Kit (Folders v3)
 ```bash
-# Initialize and generate initial migrations
-bun drizzle-kit generate --init
+# Generate initial migrations
+bun run db:generate --init
 
 # Generate new migration after schema changes
-bun drizzle-kit generate --name add_posts_table
+bun run db:generate --name add_posts_table
 
 # Push to database (development)
-bun drizzle-kit push
+bun run db:push
 
 # Migrate in production
-bun drizzle-kit migrate
+bun run db:migrate
 ```
 
 drizzle.config.ts (1.x):
