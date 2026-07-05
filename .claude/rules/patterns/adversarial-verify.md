@@ -1,0 +1,1 @@
+../../../.agentic/rules/patterns/adversarial-verify.md

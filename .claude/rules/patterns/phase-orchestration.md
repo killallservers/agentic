@@ -1,0 +1,1 @@
+../../../.agentic/rules/patterns/phase-orchestration.md

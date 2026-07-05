@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO="${REPO:-killallservers/skills}"
+REPO="${REPO:-killallservers/agentic}"
 BRANCH="${BRANCH:-main}"
 BASE_URL="https://raw.githubusercontent.com/$REPO/$BRANCH"
 
@@ -63,6 +63,14 @@ EOF
   else
     echo "  ✓ .gitignore already has Claude Code entries"
   fi
+fi
+
+echo ""
+
+# Copy TEMPLATE.md to README.md if README.md doesn't exist
+if [ ! -f README.md ] && [ -f TEMPLATE.md ]; then
+  cp TEMPLATE.md README.md
+  echo "✓ Created README.md from TEMPLATE.md"
 fi
 
 echo ""

@@ -1,0 +1,2 @@
+- [Haiku](haiku.md) — A haiku about code and patience
+- [Subagents & Workflows](subagents_workflows.md) — Core concepts, use cases, and quality patterns
