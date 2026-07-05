@@ -110,6 +110,62 @@ package.json, tsconfig.json, bun.lockb  # Setup CLI dependencies
 - **drizzle**: Type-safe ORM for SQLite
 - **hono**: Ultrafast web framework for APIs
 
+## Setup CLI Development
+
+The interactive setup wizard is built with Bun, TypeScript, and Ink (React terminal UI).
+
+### Development
+
+```bash
+# Install dependencies
+bun install
+
+# Run setup locally
+bun run dev setup
+
+# Build for distribution
+bun run build
+
+# Run built CLI
+bun dist/index.js setup
+```
+
+### CLI Architecture
+
+- **`src/index.ts`** — CLI entry point, orchestrates the setup flow
+- **`src/llm/`** — LLM provider definitions and client
+  - `providers.ts` — Supported providers and their models
+  - `client.ts` — API client for Anthropic, OpenAI, etc
+- **`src/prompts/`** — Ink UI components
+  - `llm-setup.tsx` — Provider → Model → API Key flow
+- **`src/utils/`** — Utilities
+  - `env.ts` — Safe .env file writes
+- **`src/types.ts`** — TypeScript interfaces
+- **`src/init/`** — Scaffolding templates
+  - `core/` — Always installed
+  - `skills/` — Conditionally installed
+
+### Adding a New LLM Provider
+
+1. Add to `PROVIDERS` in `src/llm/providers.ts`
+2. Implement validation in `LLMClient` (add a `validate<Provider>Key()` method)
+3. Implement API call in `LLMClient` (add a `call<Provider>()` method)
+
+Example:
+
+```typescript
+export const PROVIDERS: Record<string, LLMProvider> = {
+  // ... existing
+  mistral: {
+    name: 'Mistral',
+    models: ['mistral-large', 'mistral-medium'],
+    apiKeyEnvVar: 'MISTRAL_API_KEY',
+  },
+}
+```
+
+Then add validation and call methods in `client.ts`.
+
 ## License
 
 See LICENSE file for details.
