@@ -1,6 +1,7 @@
 {
-  "name": "@killallservers/agentic-cli",
+  "name": "@killallservers/agentic",
   "version": "0.1.0",
+  "description": "Claude Code agents, workflows, and skills for building modern applications",
   "type": "module",
   "bin": {
     "agentic": "dist/index.js"

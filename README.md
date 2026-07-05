@@ -11,7 +11,24 @@ This repository contains a curated collection of Claude Code agents and skills f
 
 ## Installation
 
-Run the installation script in your project directory:
+### Quick Start: Interactive Setup
+
+```bash
+npm install @killallservers/agentic
+npx agentic setup
+```
+
+The interactive CLI will:
+1. Prompt you to select an LLM provider (Anthropic, OpenAI, etc)
+2. Choose a model
+3. Enter your API key (stored securely in `.env`)
+4. Ask contextual questions about your team and stack
+5. Generate personalized agent prompts
+6. Install only the skills you need
+
+### Manual Installation
+
+Or sync agents and skills to your project manually:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/killallservers/skills/main/install.sh | bash
@@ -60,13 +77,23 @@ Memory persists context across workflow phases: phase 2 agents can reference pha
 .agentic/
 ├── agents/          # Custom agent definitions
 ├── skills/          # Skill definitions (bun, drizzle, hono)
-├── rules/           # Security and access rules
+├── rules/           # Security rules and quality patterns
+├── workflows/       # Workflow templates (audit, migrate, etc)
 ├── hooks/           # File synchronization hooks
 └── memory/          # Memory storage (after configuration)
 
 .claude/
 ├── settings.json    # Project-wide Claude Code settings
 └── settings.local.json  # Local overrides (gitignored)
+
+src/                 # Setup CLI (TypeScript/Bun)
+├── index.ts         # CLI entry point
+├── llm/             # LLM provider clients
+├── prompts/         # Ink UI components
+├── utils/           # Helper functions
+└── types.ts         # TypeScript interfaces
+
+package.json, tsconfig.json, bun.lockb  # Setup CLI dependencies
 ```
 
 ## Available Agents
