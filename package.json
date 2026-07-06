@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "bun run src/index.ts",
     "typecheck": "tsgo --noEmit",
-    "build": "bun build --compile --outfile agentic src/index.ts"
+    "build": "bun build --compile --minify --outfile agentic src/index.ts"
   },
   "dependencies": {
     "ink": "^7.1.0",
