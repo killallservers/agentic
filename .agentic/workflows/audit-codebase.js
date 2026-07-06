@@ -15,17 +15,24 @@ const pattern = args?.pattern || 'src/**/*.ts'
 const issue = args?.issue || 'security issues'
 
 phase('Discover')
-const files = await agent(
-  `List all files matching this glob pattern: ${pattern}\n\nReturn a JSON object with a "files" array of file paths.`,
-  {
-    label: 'find-files',
-    schema: {
-      type: 'object',
-      required: ['files'],
-      properties: { files: { type: 'array', items: { type: 'string' } } },
-    },
-  }
-)
+// Gracefully handle agent failures during file discovery
+let files
+try {
+  files = await agent(
+    `List all files matching this glob pattern: ${pattern}\n\nReturn a JSON object with a "files" array of file paths.`,
+    {
+      label: 'find-files',
+      schema: {
+        type: 'object',
+        required: ['files'],
+        properties: { files: { type: 'array', items: { type: 'string' } } },
+      },
+    }
+  )
+} catch (err) {
+  log(`Error discovering files: ${err.message}. Returning empty results.`)
+  return { findings: [] }
+}
 
 if (!files?.files?.length) {
   log(`No files found matching ${pattern}`)
@@ -34,7 +41,15 @@ if (!files?.files?.length) {
 
 log(`Found ${files.files.length} files to audit`)
 
+// Check budget before proceeding with expensive audit
+if (budget.total && budget.remaining() < 100_000) {
+  log(`Low budget (${Math.round(budget.remaining() / 1000)}k remaining). Reducing audit scope.`)
+  // Audit only first 5 files if budget is low
+  files.files = files.files.slice(0, 5)
+}
+
 phase('Audit')
+// Pipeline ensures parallel execution; gracefully handle per-file failures
 const audits = await pipeline(
   files.files,
   (file) =>
@@ -52,6 +67,11 @@ const audits = await pipeline(
         },
       }
     )
+    .catch(err => {
+      // If a single file audit fails, log and continue with others
+      log(`Warning: Audit failed for ${file}: ${err.message}`)
+      return null // null filtered out below
+    })
 )
 
 const allFindings = audits
