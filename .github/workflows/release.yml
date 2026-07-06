@@ -58,17 +58,14 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v8
 
-      - name: Flatten artifacts
-        run: |
-          for dir in agentic-*/; do
-            mv "$dir/agentic-"* . || true
-          done
-          ls -la agentic-*
+      - name: List artifacts
+        run: find . -type f -name 'agentic-*' | head -20
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
-          files: agentic-*
+          files: |
+            agentic-*/agentic-*
           draft: false
           prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'alpha') }}
         env:
