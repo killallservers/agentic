@@ -13,13 +13,13 @@ A curated distribution of Claude Code agents, workflows, and skills for building
 
 ## Planned Improvements
 
-### Phase 1: Clarity & Education (High Impact)
+### Phase 1: Clarity & Education ✅ Complete
 Help teams adopt workflows and patterns faster.
 
-- [ ] **Real project examples** — Full walk-throughs showing a workflow from start to finish (e.g., "audit TypeScript routes for auth, refactor findings, verify refactors against audit")
-- [ ] **Memory flow documentation** — Guide for using persistent memory across workflow phases with before/after examples
-- [ ] **Product/team context templates** — Help agents reason better by capturing team priorities (e.g., "we prioritize type safety", "compliance is non-negotiable")
-- [ ] **Workflow decision tree** — When to use audit-codebase vs. loop-until-converged; how to compose workflows together
+- [x] **Real project examples** — 4 complete walk-throughs: security audit, Drizzle migration, bug discovery, architecture decision
+- [x] **Memory flow documentation** — Guide with 2 before/after patterns (audit→fix→verify, research→validate→synthesize)
+- [x] **Product/team context templates** — 3 templates (startup, enterprise, learning) with system prompts and checklists
+- [x] **Workflow decision tree** — Interactive guide covering all 6 workflows with cost, use cases, and customization
 
 ### Phase 2: Robustness & Composition (Medium Impact)
 Build confidence in production use.

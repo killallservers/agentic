@@ -63,6 +63,29 @@ Workflows are **stack-agnostic**: the same audit template works on any codebase 
 
 See `.agentic/AGENTS.md` for the complete guide.
 
+## Learning by Example
+
+The best way to learn workflows is to see them in action:
+
+- **[Example 1: Security Audit](./agentic/examples/01-security-audit-workflow.md)** — Find and fix auth vulnerabilities
+- **[Example 2: Drizzle Migration](./agentic/examples/02-drizzle-migration-workflow.md)** — Migrate TypeORM to Drizzle in parallel
+- **[Example 3: Bug Discovery](./agentic/examples/03-bug-discovery-workflow.md)** — Iteratively find flaky tests
+- **[Example 4: Architecture Decision](./agentic/examples/04-architecture-decision.md)** — Use judge-panel for informed decisions
+
+Each example is a complete walk-through: problem statement, workflow invocation, expected output, cost breakdown, and common mistakes.
+
+## Quick Navigation
+
+**New to agentic?** Start here:
+1. Run setup: `curl -fsSL https://raw.githubusercontent.com/killallservers/agentic/main/setup.sh | bash`
+2. Pick a workflow: [Workflow Selection Guide](./.agentic/WORKFLOW_SELECTION.md)
+3. Read the corresponding example above
+4. Invoke the workflow in Claude Code
+
+**Want to customize agents?** See [Agent Personalization Guide](./.agentic/agents/PERSONALIZATION_GUIDE.md)
+
+**Building multi-phase workflows?** See [Memory Flow Patterns](./.agentic/rules/memory-flow-patterns.md)
+
 ## Directory Structure
 
 ### `.agentic/` — Source of Truth
