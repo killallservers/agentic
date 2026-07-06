@@ -9,14 +9,13 @@
   "scripts": {
     "dev": "bun run src/index.ts",
     "typecheck": "tsgo --noEmit",
-    "build": "bun build --compile --outfile agentic --external:react-devtools-core src/index.ts"
+    "build": "bun build --compile --outfile agentic src/index.ts"
   },
   "dependencies": {
     "ink": "^7.1.0",
     "ink-select-input": "^6.2.0",
     "ink-text-input": "^6.0.0",
-    "react": "^19.2.7",
-    "react-devtools-core": "^7.0.1"
+    "react": "^19.2.7"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.2",
