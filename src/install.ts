@@ -25,6 +25,10 @@ const SCAFFOLD_FILES = [
   'workflows/research-question.js',
   'memory/MEMORY.md',
   'memory/subagents_workflows.md',
+  'skills/bun/SKILL.md',
+  'skills/biome/SKILL.md',
+  'skills/drizzle/SKILL.md',
+  'skills/hono/SKILL.md',
   'hooks/symlink-to-claude.sh',
 ]
 
