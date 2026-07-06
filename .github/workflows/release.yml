@@ -59,7 +59,11 @@ jobs:
         uses: actions/download-artifact@v8
 
       - name: Flatten artifacts
-        run: find . -name 'agentic-*' -type f -exec mv {} . \;
+        run: |
+          for dir in agentic-*/; do
+            mv "$dir/agentic-"* . || true
+          done
+          ls -la agentic-*
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
