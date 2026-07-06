@@ -16,12 +16,12 @@ jobs:
           - os: ubuntu-latest
             target: linux-arm64
             arch: aarch64
-          - os: macos-latest
-            target: macos-x64
-            arch: x86_64
-          - os: macos-latest
-            target: macos-arm64
-            arch: arm64
+          # - os: macos-latest
+          #   target: macos-x64
+          #   arch: x86_64
+          # - os: macos-latest
+          #   target: macos-arm64
+          #   arch: arm64
 
     runs-on: ${{ matrix.os }}
     steps:
