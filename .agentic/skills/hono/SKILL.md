@@ -745,3 +745,164 @@ app.get('/api/users/:id', async (c) => {
 - **No magic**: Built on Web Standards (Request/Response) — very portable
 - **One process**: Single Bun process handles the entire API
 - **Environment abstraction**: Use env vars and `.env.local` for config
+
+## Edge Cases & Gotchas
+
+### Route Matching Complexity
+
+**Problem:** Deep route trees become slow or unpredictable
+
+**Symptom:**
+```typescript
+app.get('/api/v1/users/:id/posts/:postId/comments/:commentId/likes')
+// Many nested routes → linear matching time
+```
+
+**Solution:**
+- Limit nesting depth (3 levels max)
+- Use route parameters instead: `/api/resources/:id`
+- Query parameters for filtering: `/api/posts?authorId=123&limit=10`
+
+### Middleware Ordering
+
+**Problem:** Middleware runs in wrong order, breaking logic
+
+**Symptom:**
+```typescript
+app.use(authMiddleware)
+app.use(loggingMiddleware)  // Logs before auth? Logging sees unauthenticated requests
+```
+
+**Solution:**
+- Define middleware BEFORE routes
+- Order matters: global → auth → logging → routes
+- Use app.use() for global, app.get(middleware, ...) for route-specific
+
+### Streaming Response + Middleware
+
+**Problem:** Middleware tries to read body after streaming starts
+
+**Symptom:**
+```typescript
+app.post('/upload', middleware, async (c) => {
+  return c.streamText(...)  // Middleware already read body!
+})
+```
+
+**Solution:**
+- Streaming middleware must be route-specific
+- Don't parse body in global middleware for streaming routes
+- Use conditional checks: `if (!isStreamingRoute) { parseBody() }`
+
+### Error Recovery in Middleware Chains
+
+**Problem:** Error in middleware leaves response partially sent
+
+**Symptom:**
+```typescript
+app.use(async (c, next) => {
+  try {
+    await next()
+  } catch (err) {
+    // Body already sent, can't change status
+    return c.text('Error', 500)  // Too late!
+  }
+})
+```
+
+**Solution:**
+- Error handling middleware must be FIRST
+- Use onError hook: `app.onError((err, c) => {})`
+- Return proper error response
+
+### CORS + Authentication Interaction
+
+**Problem:** CORS headers interfere with auth, or vice versa
+
+**Symptom:**
+```typescript
+// CORS blocks auth headers
+app.use(cors({ origin: '*' }))  // Allows all, but...
+app.use(authMiddleware)  // Auth checks Authorization header
+// Preflight request fails?
+```
+
+**Solution:**
+```typescript
+// CORS first, with proper config
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:3000',
+  credentials: true,  // Allow credentials (cookies, auth headers)
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+}))
+
+// Auth second
+app.use(authMiddleware)
+```
+
+## Anti-Patterns
+
+### ❌ Don't: Put middleware logic in routes
+
+```typescript
+// Bad: auth logic repeated in every route
+app.get('/api/users', async (c) => {
+  const user = await checkAuth()  // Repeated
+  if (!user) return c.text('Unauthorized', 401)
+  // ...
+})
+
+// Good: use middleware
+app.use(requireAuth)  // Once
+app.get('/api/users', async (c) => {
+  const user = c.get('user')  // Already authenticated
+  // ...
+})
+```
+
+### ❌ Don't: Middleware for business logic
+
+```typescript
+// Bad: business logic in middleware
+app.use(async (c, next) => {
+  const user = await findUser(userId)
+  if (user.premium) {
+    // Do something special
+  }
+  await next()
+})
+
+// Good: business logic in route handler
+app.get('/api/premium-feature', async (c) => {
+  const user = c.get('user')
+  if (!user.isPremium) return c.text('Not available', 403)
+  // Logic here
+})
+```
+
+### ❌ Don't: Forget route documentation
+
+```typescript
+// Bad: routes with no description
+app.post('/api/process', handler)
+app.get('/api/results/:id', handler)
+
+// Good: self-documenting
+app.post('/api/process', { description: 'Start async process' }, handler)
+app.get('/api/results/:id', { description: 'Get process result by ID' }, handler)
+```
+
+### ❌ Don't: Use global middleware for streaming routes
+
+```typescript
+// Bad: global body parser + streaming route
+app.use(bodyParser())  // Reads body globally
+app.post('/upload', streamHandler)  // Expects readable stream, body already consumed
+```
+
+```typescript
+// Good: skip body parsing for streaming routes
+app.use(bodyParser())
+app.post('/upload', skipMiddleware([bodyParser]), streamHandler)
+```

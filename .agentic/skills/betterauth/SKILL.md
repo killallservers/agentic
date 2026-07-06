@@ -1010,6 +1010,225 @@ api.post("/logout-all-devices", async (c) => {
 - [ ] Test CSRF protection
 - [ ] Review security headers (CORS, SameSite, etc.)
 
+## Edge Cases & Gotchas
+
+### Session Hijacking Prevention
+
+**Problem:** Session tokens accessible to malicious scripts (XSS)
+
+**Solution:**
+```typescript
+// Use httpOnly cookies, never localStorage
+const session = await betterAuth.createSession({
+  userId,
+  cookieOptions: {
+    httpOnly: true,  // Can't be accessed by JavaScript
+    secure: true,    // HTTPS only
+    sameSite: 'strict',
+  }
+})
+```
+
+**Never:**
+```typescript
+// Don't store tokens in localStorage (XSS vulnerable)
+localStorage.setItem('token', sessionToken)
+```
+
+### Token Rotation Strategies
+
+**Problem:** Reusing tokens indefinitely increases breach window
+
+**Solution:**
+```typescript
+// Rotate tokens on each request (sliding window)
+const session = await betterAuth.refreshSession(sessionId)
+// Old token invalidated, new token issued
+
+// Or: rotate on sensitive operations
+const sensitive = await betterAuth.requireMFA(session)
+```
+
+### Cross-Tab Session Sync
+
+**Problem:** Session expires in tab A, still valid in tab B
+
+**Solution:**
+```typescript
+// Check session validity before each request
+const isValid = await betterAuth.verifySession(sessionToken)
+if (!isValid) {
+  // Redirect to login
+  window.location.href = '/login'
+}
+
+// Or: use storage events to sync across tabs
+window.addEventListener('storage', (e) => {
+  if (e.key === 'auth:session' && !e.newValue) {
+    // Session invalidated in another tab
+    logout()
+  }
+})
+```
+
+### OAuth Provider Quirks
+
+**Problem:** Each OAuth provider has different response formats
+
+**Known issues:**
+- **Google:** Returns `id_token` but not always `refresh_token`
+- **GitHub:** No user email if account is private
+- **Okta:** Requires explicit scopes for user info
+
+**Solution:**
+```typescript
+// Handle provider-specific responses
+const user = await betterAuth.oauth.callback(provider, code)
+
+// Verify provider returned expected fields
+if (provider === 'google' && !user.email) {
+  throw new Error('Google must return email')
+}
+
+// Map provider fields to app schema
+const normalizedUser = {
+  id: user.sub || user.id,
+  email: user.email,
+  name: user.name,
+  avatar: user.picture,
+}
+```
+
+### MFA Gotchas
+
+**Recovery Codes:**
+```typescript
+// Generate when enabling MFA
+const { backupCodes } = await betterAuth.mfa.enableTOTP()
+
+// Store securely (not in browser storage)
+// If user loses authenticator, only recovery codes work
+const recoveryCode = prompt('Enter recovery code')
+const authenticated = await betterAuth.mfa.verifyRecoveryCode(recoveryCode)
+```
+
+**TOTP Drift:**
+```typescript
+// Clock skew between server and device
+// Solution: allow ±1 time window
+const verified = await betterAuth.mfa.verifyTOTP(code, {
+  window: 1  // Allow previous/next 30-second window
+})
+```
+
+**Backup MFA Method:**
+```typescript
+// If primary MFA disabled/lost, what's the fallback?
+// Solution: require second MFA before disabling first
+if (user.mfaEnabled) {
+  const backupMFA = await betterAuth.mfa.enableBackupMethod()
+  // User must confirm backup before disabling primary
+}
+```
+
+### CSRF Protection
+
+**Problem:** Cross-site requests forge session
+
+**Solution:**
+```typescript
+// BetterAuth generates CSRF tokens automatically
+// Verify token on state-changing requests (POST, PUT, DELETE)
+
+// In form:
+<form method="POST">
+  <input type="hidden" name="csrf" value={csrfToken} />
+  <button>Sign out</button>
+</form>
+
+// In handler:
+app.post('/logout', async (c) => {
+  const csrf = c.req.formData().csrf
+  if (csrf !== c.get('csrfToken')) {
+    return c.text('CSRF token invalid', 403)
+  }
+  await betterAuth.logout(sessionId)
+})
+```
+
+## Anti-Patterns
+
+### ❌ Don't: Store tokens in localStorage
+
+```typescript
+// Bad: XSS can steal tokens
+const token = await betterAuth.createSession()
+localStorage.setItem('auth_token', token)
+
+// Good: use httpOnly cookies
+// BetterAuth handles this automatically
+```
+
+### ❌ Don't: Skip CSRF validation
+
+```typescript
+// Bad: allows cross-site forgery
+app.post('/logout', async (c) => {
+  await betterAuth.logout(sessionId)  // No CSRF check!
+})
+
+// Good: validate CSRF token
+app.post('/logout', validateCSRF, async (c) => {
+  await betterAuth.logout(sessionId)
+})
+```
+
+### ❌ Don't: Hardcode OAuth secrets
+
+```typescript
+// Bad: secrets in code!
+const auth = betterAuth({
+  google: {
+    clientId: 'xxx-xxx-xxx',
+    clientSecret: 'super-secret-key',  // EXPOSED!
+  }
+})
+
+// Good: use env vars
+const auth = betterAuth({
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  }
+})
+```
+
+### ❌ Don't: Trust provider tokens at face value
+
+```typescript
+// Bad: assume provider token is valid
+const user = await parseJWT(googleToken)
+// Could be forged, expired, or revoked
+
+// Good: verify with provider
+const user = await betterAuth.oauth.callback('google', code)
+// BetterAuth verifies the token with Google
+```
+
+### ❌ Don't: Reuse recovery codes
+
+```typescript
+// Bad: user can reuse same recovery code
+const verified = await betterAuth.mfa.verifyRecoveryCode(code)
+// User enters same code again next time
+
+// Good: consume recovery code on use
+const verified = await betterAuth.mfa.verifyRecoveryCode(code, {
+  consumeOnUse: true
+})
+// Code is invalidated after first use
+```
+
 ## External Resources
 
 - **Official Docs:** https://better-auth.com/docs

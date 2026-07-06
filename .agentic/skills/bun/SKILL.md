@@ -1120,6 +1120,191 @@ if (process.platform === "win32") {
 }
 ```
 
+## Edge Cases & Gotchas
+
+### Workspace Circular Dependencies
+
+**Problem:** Package A depends on B, B depends on A → infinite loop
+
+**Symptom:**
+```
+Error: Circular dependency detected
+```
+
+**Solution:**
+- Create shared package C with common types/utilities
+- A → C ← B (diamond pattern instead of circle)
+- Move shared code up the hierarchy
+
+### Workspace Script Inheritance
+
+**Problem:** Workspace package inherits parent's package.json scripts
+
+**Symptom:**
+```bash
+cd packages/api && bun run dev
+# Runs the root dev script, not packages/api/dev
+```
+
+**Solution:**
+- Define scripts explicitly in each workspace package.json
+- Don't rely on inheritance
+- Use `-w` flag to be explicit: `bun run -w @workspace/api dev`
+
+### Bundling Tree-Shaking Limitations
+
+**Problem:** Dead code isn't removed during bundling
+
+**Symptom:**
+```bash
+bun build ./src/index.ts --minify
+# Output still contains unused functions
+```
+
+**Causes:**
+- Side effects in module (global code runs on import)
+- Dynamic imports (can't statically determine what's used)
+- Export of large objects (even if only 1 property used)
+
+**Solution:**
+- Mark pure modules: `/* @__PURE__ */`
+- Avoid side effects at module level
+- Use explicit exports instead of export *
+- Check bundle size: `bun build --minify --sourcemap`
+
+### Docker & bun install
+
+**Problem:** Docker builds fail or are slow with `bun install`
+
+**Symptom:**
+```dockerfile
+RUN bun install
+# Error: bun.lock not found, or very slow rebuild each time
+```
+
+**Solution:**
+```dockerfile
+# Copy lock file first (caching layer)
+COPY bun.lock ./
+COPY package.json ./
+RUN bun install --frozen-lockfile
+
+# Then copy source
+COPY src ./src
+RUN bun build ./src/index.ts
+```
+
+### Mixing Package Managers
+
+**Problem:** Using npm AND bun in same project
+
+**Symptom:**
+```bash
+bun add react
+npm install  # Overwrites bun.lock
+# Inconsistent dependencies
+```
+
+**Solution:**
+- Pick ONE package manager for the project
+- Use .npmrc or bunfig.toml to enforce it
+- CI/CD should only run `bun install`
+
+### Platform-Specific Bundles
+
+**Problem:** Binary built on macOS doesn't run on Linux
+
+**Symptom:**
+```bash
+bun build ./src/cli.ts --target executable
+# Works on macOS, fails on Linux
+```
+
+**Solution:**
+- Build in Docker (runs on Linux regardless of host)
+- Specify target: `--target executable --outfile cli-linux`
+- Cross-compile is complex; avoid if possible
+
+### Undocumented Runtime APIs
+
+**Problem:** Using Bun APIs that might change
+
+**Symptom:**
+```typescript
+// This might not exist in next Bun version
+Bun.unsafe.something()
+```
+
+**Solution:**
+- Stick to documented APIs (Bun.serve, Bun.file, Bun.env)
+- Avoid Bun.unsafe or Bun.FFI unless necessary
+- Expect breaking changes in pre-1.0 features
+
+## Anti-Patterns
+
+### ❌ Don't: `bun install` in Docker without lock file
+
+```dockerfile
+# Bad: lock file not cached, reinstalls every build
+COPY package.json ./
+RUN bun install
+COPY src ./src
+```
+
+```dockerfile
+# Good: lock file cached, reuses layer
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
+COPY src ./src
+```
+
+### ❌ Don't: Mix bun and npm/yarn
+
+```bash
+bun add react
+npm install  # Wrong! Overwrites bun.lock
+```
+
+```bash
+# Good: use bun consistently
+bun add react
+bun add -d @types/react
+```
+
+### ❌ Don't: Rely on undocumented Bun features
+
+```typescript
+// Bad: Bun.unsafe might disappear
+const result = Bun.unsafe.something()
+
+// Good: use stable APIs
+const data = await Bun.file('path').json()
+const env = Bun.env.API_KEY
+```
+
+### ❌ Don't: Assume Node.js compatibility everywhere
+
+```typescript
+// Bad: works in Bun but not in Node.js
+import myModule from "./myModule"  // Implicit .ts import
+
+// Good: explicit, portable
+import myModule from "./myModule.ts"
+```
+
+### ❌ Don't: Ship build artifacts as executable without testing
+
+```bash
+bun build ./src/cli.ts --target executable --outfile my-cli
+# Ship directly? Could fail on different OS/architecture
+```
+
+```bash
+# Good: test on target platform before shipping
+bun build ./src/cli.ts --target executable --outfile my-cli
+# Test locally and in CI on target platform
+```
+
 ## When to Use Bun
 
 ✓ **Best for:**

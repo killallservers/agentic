@@ -329,6 +329,191 @@ Always:
 7. When migrating from 0.x, reference the breaking changes section above
 8. Link to https://orm.drizzle.team (has "Upgrade to v1.0" guides)
 
+## Edge Cases & Gotchas
+
+### Migration with Schema Versioning
+
+**Problem:** How do you track schema versions across migrations?
+
+**Solution:**
+```typescript
+// migrations/0001_init.sql
+CREATE TABLE schema_versions (id INT PRIMARY KEY, version VARCHAR(50));
+INSERT INTO schema_versions VALUES (1, '0.0.1');
+
+// migrations/0002_add_users.sql
+ALTER TABLE schema_versions SET version = '0.0.2' WHERE id = 1;
+```
+
+Then query on startup: `SELECT version FROM schema_versions`
+
+### Circular Relations
+
+**Problem:** Table A references B, B references A
+
+**Symptom:**
+```typescript
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  groupId: integer('group_id').references(() => groups.id),
+})
+
+export const groups = pgTable('groups', {
+  id: serial('id').primaryKey(),
+  ownerId: integer('owner_id').references(() => users.id),  // Circular!
+})
+```
+
+**Solution:**
+- One side gets the foreign key, other side has no reference
+- Query through the key side: `db.query.users.findFirst({ with: { group: true } })`
+- From groups: manual join or denormalize owner info
+
+### Many-to-Many with Metadata
+
+**Problem:** Junction table needs extra columns (e.g., timestamp of when relationship created)
+
+**Solution:**
+```typescript
+// Don't try to add columns to many-to-many in defineRelations
+// Instead: create explicit junction table with columns
+
+export const userRoles = pgTable('user_roles', {
+  userId: integer('user_id').references(() => users.id),
+  roleId: integer('role_id').references(() => roles.id),
+  assignedAt: timestamp('assigned_at').defaultNow(),
+  // Custom columns!
+})
+
+export const usersRelations = relations(users, ({ many }) => ({
+  roles: many(userRoles),
+}))
+```
+
+Query: `db.query.userRoles.findMany({ where: eq(userRoles.userId, 123) })`
+
+### Lazy vs Eager Loading Performance
+
+**Problem:** Lazy loading (`.with()`) causes N+1 queries
+
+**Bad (N+1):**
+```typescript
+const users = await db.select().from(users)  // 1 query
+for (const user of users) {
+  const posts = await db.select().from(posts).where(eq(posts.userId, user.id))  // N queries
+}
+```
+
+**Good (eager load):**
+```typescript
+const users = await db.query.users.findMany({
+  with: { posts: true }  // 1 query with JOIN
+})
+```
+
+### Rollback Scenarios
+
+**Problem:** Migration fails in production, how to rollback?
+
+**Drizzle migrations don't have built-in rollbacks.** Solution:
+
+```typescript
+// migrations/0001_add_column.sql
+-- UP
+ALTER TABLE users ADD COLUMN age INTEGER;
+
+-- DOWN (in separate file or documentation)
+ALTER TABLE users DROP COLUMN age;
+```
+
+Run `ALTER TABLE users DROP COLUMN age` separately to rollback.
+
+Or create rollback script: `migrations/rollback/0001_drop_age.sql`
+
+### Data Transformation During Migration
+
+**Problem:** Changing column type requires transforming existing data
+
+**Solution:**
+```sql
+-- Create new column with new type
+ALTER TABLE users ADD COLUMN age_new INTEGER;
+
+-- Transform data
+UPDATE users SET age_new = CAST(age_text AS INTEGER);
+
+-- Drop old column, rename new
+ALTER TABLE users DROP COLUMN age;
+ALTER TABLE users RENAME COLUMN age_new TO age;
+```
+
+## Anti-Patterns
+
+### ❌ Don't: Use raw SQL in type-safe context
+
+```typescript
+// Bad: loses type safety
+const result = await db.execute(sql`SELECT * FROM users WHERE id = ${id}`)
+
+// Good: type-safe
+const user = await db.query.users.findFirst({ where: eq(users.id, id) })
+```
+
+### ❌ Don't: Create circular foreign keys
+
+```typescript
+// Bad: A→B and B→A
+export const users = pgTable('users', {
+  groupId: integer('group_id').references(() => groups.id),
+})
+
+export const groups = pgTable('groups', {
+  ownerId: integer('owner_id').references(() => users.id),
+})
+```
+
+```typescript
+// Good: One direction only
+export const users = pgTable('users', {
+  groupId: integer('group_id').references(() => groups.id),
+})
+
+export const groups = pgTable('groups', {
+  // No reference back to users
+})
+```
+
+### ❌ Don't: Mix Drizzle and raw SQL migrations
+
+```bash
+# Bad: Drizzle migration + manual SQL migration
+bun drizzle-kit migrate
+# Then manually: psql -c "ALTER TABLE..."
+# Drizzle doesn't know about the change, out of sync
+```
+
+```bash
+# Good: Use Drizzle for all migrations
+# Edit schema.ts
+bun drizzle-kit generate  # Generate migration
+bun drizzle-kit migrate   # Run it
+```
+
+### ❌ Don't: Assume lazy relations are cached
+
+```typescript
+// Bad: N+1 if not careful
+const users = await db.query.users.findMany()
+users.forEach(async user => {
+  const posts = await user.posts  // Separate query per user!
+})
+
+// Good: eager load
+const users = await db.query.users.findMany({
+  with: { posts: true }
+})
+```
+
 ## Documentation reference
 - Full docs: https://orm.drizzle.team
 - LLM reference: https://orm.drizzle.team/llms.txt
