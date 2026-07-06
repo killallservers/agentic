@@ -8,8 +8,8 @@
   },
   "scripts": {
     "dev": "bun run src/index.ts",
-    "build": "bun build --compile --outfile agentic --external:react-devtools-core src/index.ts",
-    "start": "bun dist/index.js"
+    "type-check": "tsgo",
+    "build": "bun build --compile --outfile agentic --external:react-devtools-core src/index.ts"
   },
   "dependencies": {
     "ink": "^7.1.0",
