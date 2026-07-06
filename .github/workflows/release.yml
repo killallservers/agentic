@@ -41,11 +41,14 @@ jobs:
       - name: Build executable
         run: bun run build
 
+      - name: Rename binary
+        run: mv agentic agentic-${{ matrix.target }}
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: agentic-${{ matrix.target }}
-          path: agentic
+          path: agentic-${{ matrix.target }}
 
   release:
     needs: build
@@ -61,7 +64,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: agentic-*/*
+          files: |
+            agentic-*
           draft: false
           prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'alpha') }}
         env:
