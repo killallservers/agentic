@@ -7,6 +7,7 @@ import React from "react";
 import { LLMClient } from "./llm/client";
 import { AgentGeneratorPrompt } from "./prompts/agent-generator";
 import { LLMSetup } from "./prompts/llm-setup";
+import { SetupQuestionnaire } from "./prompts/setup-questionnaire";
 import { type SetupConfig, buildFullConfig } from "./types";
 import { loadConfig, saveConfig } from "./config";
 import { installScaffolding, runSymlinkHook } from "./install";
@@ -103,10 +104,10 @@ async function continueSetup(config: SetupConfig): Promise<void> {
   }
   ensureGitignore();
 
-  console.log("📋 Asking contextual questions...\n");
-  const answers = await client.askContextualQuestions();
+  console.log("📋 Quick setup questions...\n");
+  const answers = await getAnswersFromUI();
 
-  console.log("🤖 Generating personalized agent context...\n");
+  console.log("\n🤖 Generating personalized agent context...\n");
   const agentContext = await client.generateAgentContext(answers);
 
   console.log("📦 Deciding which skills to install...\n");
@@ -136,12 +137,25 @@ async function continueSetup(config: SetupConfig): Promise<void> {
 }
 
 function getConfigFromUI(): Promise<SetupConfig> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     const { unmount } = render(
       React.createElement(LLMSetup, {
         onComplete: (cfg: SetupConfig) => {
           unmount();
           resolve(cfg);
+        },
+      }),
+    );
+  });
+}
+
+function getAnswersFromUI(): Promise<Record<string, string>> {
+  return new Promise((resolve, _reject) => {
+    const { unmount } = render(
+      React.createElement(SetupQuestionnaire, {
+        onComplete: (answers: Record<string, string>) => {
+          unmount();
+          resolve(answers);
         },
       }),
     );

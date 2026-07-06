@@ -56,27 +56,9 @@ export class LLMClient {
   }
 
   async askContextualQuestions(): Promise<Record<string, string>> {
-    const prompt = `You are helping set up a Claude Code agent environment. Ask exactly 3-4 brief questions to understand their setup:
-1. Team priority (one word: speed/safety/compliance/ux)
-2. Tech stack (comma-separated: bun, drizzle, hono, etc)
-3. Project name
-4. Existing tooling they use
-
-Format as JSON: { "question1": "...", "question2": "...", etc }
-Be concise - each question is ONE line.`;
-
-    const questions = await this.call([{ role: "user", content: prompt }]);
-
-    try {
-      return JSON.parse(questions);
-    } catch {
-      return {
-        teamPriority: "speed",
-        stack: "bun,drizzle,hono",
-        projectName: "MyApp",
-        tooling: "none",
-      };
-    }
+    throw new Error(
+      "askContextualQuestions should not be called directly. Use interactive questionnaire instead.",
+    );
   }
 
   async generateAgentContext(answers: Record<string, string>): Promise<string> {
