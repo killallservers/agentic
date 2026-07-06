@@ -2,12 +2,8 @@
 .claude/scheduled_tasks.lock
 .claude/settings.local.json
 
-# .claude/skills/ are symlinks to .agentic/skills/ (actual files)
-.claude/skills/
-
 # Dependencies
 node_modules/
-bun.lockb
 
 # Environment
 .env
@@ -16,8 +12,6 @@ bun.lockb
 
 # Build outputs
 dist/
-build/
-.next/
 
 # IDE
 .DS_Store
