@@ -22,8 +22,9 @@ The interactive CLI will:
 2. Choose a model
 3. Enter your API key (stored securely in `.env`)
 4. Ask contextual questions about your team and stack
-5. Generate personalized agent prompts
-6. Install only the skills you need
+5. Generate personalized agent context
+6. Copy scaffolding files to `.agentic/` and create symlinks to `.claude/`
+7. Save your configuration to `.config/agentic/config.toml`
 
 ### Manual Installation
 
@@ -36,6 +37,20 @@ bun install
 bun run dev setup
 ```
 
+### What Setup Does
+
+The setup wizard automates three key steps:
+
+1. **Configures your LLM provider** — Validates your API key and remembers which provider/model you chose
+2. **Personalizes agents and workflows** — Asks about your team and tech stack, then customizes agent system prompts
+3. **Installs scaffolding** — Copies agents, workflows, skills, and quality patterns to `.agentic/`, then syncs them to `.claude/` via symlinks
+
+After setup completes, your Claude Code environment has:
+- ✅ `.agentic/` — Source of truth for agents, workflows, skills, rules, and memory
+- ✅ `.claude/` — Symlinked interface for Claude Code to read from
+- ✅ `.env` — API key stored securely (add to `.gitignore`)
+- ✅ `.config/agentic/config.toml` — Your setup configuration
+
 ## For Workflow-Driven Teams
 
 If you're building multi-agent orchestrations, this repo is your starting point:
@@ -47,6 +62,67 @@ If you're building multi-agent orchestrations, this repo is your starting point:
 Workflows are **stack-agnostic**: the same audit template works on any codebase (Python, Go, TypeScript, etc). Skills teach domain expertise; workflows teach orchestration patterns.
 
 See `.agentic/AGENTS.md` for the complete guide.
+
+## Directory Structure
+
+### `.agentic/` — Source of Truth
+
+Contains all your Claude Code agents, workflows, skills, rules, and memory:
+
+```
+.agentic/
+├── agents/          # Custom agent definitions (architect, code-reviewer)
+├── workflows/       # Reusable orchestration templates (audit, judge-panel, etc)
+├── skills/          # Stack-specific documentation (bun, drizzle, hono, biome)
+├── rules/           # Security rules and quality patterns
+│   ├── default.md   # Project security rules
+│   └── patterns/    # Orchestration patterns (adversarial-verify, dedup, cost-aware)
+├── memory/          # Memory boilerplate for persistent context across sessions
+├── hooks/           # Utility scripts (symlink hook for .claude/ synchronization)
+└── AGENTS.md        # Comprehensive guide to agents, workflows, and patterns
+```
+
+### `.claude/` — Claude Code Interface
+
+Symlinked to `.agentic/` so Claude Code can read your agents, workflows, and skills. You don't edit files here—edit `.agentic/` and run the hook to sync:
+
+```
+.claude/
+├── agents/          # Symlinks to .agentic/agents/
+├── workflows/       # Symlinks to .agentic/workflows/
+├── skills/          # Symlinks to .agentic/skills/
+├── rules/           # Symlinks to .agentic/rules/
+├── AGENTS.md        # Symlink to .agentic/AGENTS.md
+├── settings.json    # Project-wide Claude Code settings (user-created)
+└── settings.local.json  # Local overrides (gitignored, user-created)
+```
+
+### Why Symlinks?
+
+Symlinks keep one source of truth (`.agentic/`) while letting Claude Code read from `.claude/` without file duplication. Benefits:
+- **Single source:** Edit in `.agentic/`, automatically available to Claude Code
+- **No duplication:** Agents, workflows, and skills aren't copied
+- **Version control friendly:** Only `.agentic/` is committed; `.claude/` stays local
+- **Portable:** Relative symlinks work regardless of where you clone the repo
+
+### Hook System: Syncing `.agentic/` → `.claude/`
+
+The symlink hook creates and maintains the symlinks. It runs automatically during setup, but you can invoke it manually when you:
+- Add a new skill to `.agentic/skills/my-skill/SKILL.md`
+- Create a new agent or workflow
+- Reorganize files in `.agentic/`
+
+**Manual invocation:**
+```bash
+bash .agentic/hooks/symlink-to-claude.sh
+```
+
+**From Claude Code** (if permissions granted):
+```
+! bash .agentic/hooks/symlink-to-claude.sh
+```
+
+For troubleshooting, see `.agentic/hooks/README.md`.
 
 ## Configuration
 
@@ -61,6 +137,17 @@ To enable persistent memory across Claude Code sessions (recommended for workflo
 ```
 
 Memory persists context across workflow phases: phase 2 agents can reference phase 1 findings, etc.
+
+### Config File
+
+Your setup configuration is saved to `.config/agentic/config.toml` and includes:
+- LLM provider and model
+- Project metadata (name, description)
+- Team information (priority, size, seniority)
+- Tech stack (runtime, language, frameworks, ORM, database)
+- Enabled skills, rules, and hooks
+
+You can manually edit this file to reconfigure without running setup again.
 
 ## Project Structure
 

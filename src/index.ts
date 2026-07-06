@@ -4,9 +4,10 @@ import { render } from 'ink'
 import React from 'react'
 import { LLMSetup } from './prompts/llm-setup'
 import { LLMClient } from './llm/client'
-import { SetupConfig } from './types'
+import { SetupConfig, buildFullConfig } from './types'
 import { writeEnvKey, ensureGitignore, readEnvKey } from './utils/env'
-import { loadConfig } from './config'
+import { loadConfig, saveConfig } from './config'
+import { installScaffolding, runSymlinkHook } from './install'
 
 async function main() {
   const args = process.argv.slice(2)
@@ -99,13 +100,23 @@ async function continueSetup(config: SetupConfig): Promise<void> {
   console.log('📦 Deciding which skills to install...\n')
   const skills = await client.decideWhichSkills(answers)
 
+  console.log('\n📂 Installing scaffolding...\n')
+  const fullConfig = buildFullConfig(config, answers, skills, agentContext)
+  await installScaffolding(fullConfig)
+
+  console.log('\n🔗 Creating symlinks...\n')
+  await runSymlinkHook()
+
+  console.log('\n💾 Saving configuration...\n')
+  saveConfig(fullConfig)
+
   console.log('\n✨ Setup complete!\n')
-  console.log('Config saved to .env')
-  console.log(`Skills to install: ${skills.join(', ')}`)
+  console.log('Your agents, workflows, and skills are ready in .agentic/ and .claude/')
+  console.log('Configuration saved to .config/agentic/config.toml')
   console.log('\nNext steps:')
-  console.log('1. Run: bun install')
-  console.log('2. Configure memory: update .claude/settings.local.json')
-  console.log('3. Try your first workflow!')
+  console.log('1. Configure memory: update .claude/settings.local.json')
+  console.log('2. Read .agentic/AGENTS.md to learn about workflows and patterns')
+  console.log('3. Try your first workflow: /audit-codebase or /judge-panel')
 }
 
 function getConfigFromUI(): Promise<SetupConfig> {
