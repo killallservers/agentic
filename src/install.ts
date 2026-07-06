@@ -2,9 +2,8 @@ import { mkdirSync, writeFileSync, statSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { execSync } from 'child_process'
 import { Config } from './config'
-import { readFileSync } from 'fs'
 
-const VERSION = JSON.parse(readFileSync(resolve(import.meta.dir, '../package.json'), 'utf-8')).version
+const VERSION = '0.1.1'
 
 const SCAFFOLD_FILES = [
   'README.md',
