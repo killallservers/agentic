@@ -23,3 +23,17 @@
 - ❌ Never add packages to dependencies manually (edit package.json, Cargo.toml, pyproject.toml directly)
 - ❌ Never guess or hardcode versions
 - When adding packages, always use: `bun add package@latest` or other package manager equivalent
+
+## Code Quality & Pre-Commit Checks
+
+**RULE: All commits must pass quality checks before creation**
+
+Before any commit is created or updated, **all four checks must pass**:
+- ✅ Type checking: `bun run typecheck`
+- ✅ Linting: `bun run lint`
+- ✅ Formatting: `bun run format`
+- ✅ Comprehensive check: `bun run check`
+
+This is enforced automatically by `.git/hooks/pre-commit`. If checks fail, commit is blocked with instructions on how to fix.
+
+See `.agentic/rules/pre-commit-checks.md` for details.

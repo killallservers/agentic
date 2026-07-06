@@ -1,4 +1,4 @@
-import { LLMProvider } from '../types'
+import type { LLMProvider } from '../types'
 
 export const PROVIDERS: Record<string, LLMProvider> = {
   anthropic: {

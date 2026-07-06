@@ -3,7 +3,7 @@ import { render, Box, Text } from 'ink'
 import SelectInput from 'ink-select-input'
 import TextInput from 'ink-text-input'
 import { listProviders, getProvider } from '../llm/providers'
-import { SetupConfig } from '../types'
+import type { SetupConfig } from '../types'
 
 interface LLMSetupProps {
   onComplete: (config: SetupConfig) => void

@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync, statSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { execSync } from 'child_process'
-import { Config } from './config'
+import type { Config } from './config'
 
 const VERSION = '0.1.1'
 

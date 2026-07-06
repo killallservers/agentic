@@ -1,4 +1,4 @@
-import { SetupConfig, LLMMessage } from '../types'
+import type { SetupConfig, LLMMessage } from '../types'
 import { getProvider } from './providers'
 
 export class LLMClient {
