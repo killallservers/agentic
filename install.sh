@@ -16,4 +16,4 @@ echo "Building CLI..."
 bun run build
 
 echo ""
-node "$TMPDIR/dist/index.js" setup
+"$TMPDIR/agentic" setup
