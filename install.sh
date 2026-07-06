@@ -2,7 +2,6 @@
 set -e
 
 INSTALL_DIR="${AGENTIC_INSTALL_DIR:-.}"
-RELEASE_VERSION="latest"
 OS=$(uname -s)
 ARCH=$(uname -m)
 
@@ -28,7 +27,7 @@ case "$OS" in
     ;;
 esac
 
-DOWNLOAD_URL="https://github.com/killallservers/agentic/releases/download/$RELEASE_VERSION/agentic-$PLATFORM"
+DOWNLOAD_URL="https://github.com/killallservers/agentic/releases/download/v0.1.0/agentic-$PLATFORM"
 BINARY_PATH="$INSTALL_DIR/agentic"
 
 echo "📥 Downloading agentic CLI..."
