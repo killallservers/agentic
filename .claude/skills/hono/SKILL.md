@@ -1,0 +1,1 @@
+../../../.agentic/skills/hono/SKILL.md
