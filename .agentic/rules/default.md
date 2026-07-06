@@ -18,8 +18,8 @@
 - ❌ Deleting files outside of build artifacts
 
 ## Package Management
-- ✅ Add packages only using the package manager (bun add, npm install, cargo add)
+- ✅ Add packages using only the package manager (bun add, cargo add, uv add)
 - ✅ Add packages using `@latest` version specifier
-- ❌ Never add packages to dependencies manually (edit package.json directly)
+- ❌ Never add packages to dependencies manually (edit package.json, Cargo.toml, pyproject.toml directly)
 - ❌ Never guess or hardcode versions
-- When adding packages, always use: `bun add package@latest` or `npm install package@latest`
+- When adding packages, always use: `bun add package@latest` or other package manager equivalent
