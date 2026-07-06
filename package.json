@@ -9,7 +9,10 @@
   "scripts": {
     "dev": "bun run src/index.ts",
     "typecheck": "tsgo --noEmit",
-    "build": "bun build --compile --minify --outfile agentic src/index.ts"
+    "build": "bun build --compile --minify --outfile agentic src/index.ts",
+    "lint": "biome lint --apply src/",
+    "format": "biome format --write src/",
+    "check": "biome check src/"
   },
   "dependencies": {
     "ink": "^7.1.0",
