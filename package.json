@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "bun run src/index.ts",
-    "type-check": "tsgo",
+    "typecheck": "tsgo --noEmit",
     "build": "bun build --compile --outfile agentic --external:react-devtools-core src/index.ts"
   },
   "dependencies": {
