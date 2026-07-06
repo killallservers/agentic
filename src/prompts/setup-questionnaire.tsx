@@ -5,6 +5,7 @@ import TextInput from "ink-text-input";
 
 interface QuestionnaireProps {
   onComplete: (answers: Record<string, string>) => void;
+  bootstrapOnly?: boolean;
 }
 
 interface QuestionnaireState {
@@ -17,7 +18,10 @@ interface QuestionnaireState {
   currentStep: number;
 }
 
-export function SetupQuestionnaire({ onComplete }: QuestionnaireProps) {
+export function SetupQuestionnaire({
+  onComplete,
+  bootstrapOnly,
+}: QuestionnaireProps) {
   const [state, setState] = useState<QuestionnaireState>({
     projectName: "",
     teamSize: "",
@@ -28,7 +32,7 @@ export function SetupQuestionnaire({ onComplete }: QuestionnaireProps) {
     currentStep: 0,
   });
 
-  const steps = [
+  const allSteps = [
     {
       label: "Project Name",
       key: "projectName",
@@ -80,6 +84,9 @@ export function SetupQuestionnaire({ onComplete }: QuestionnaireProps) {
       placeholder: "e.g., ESLint, Vitest, Docker",
     },
   ];
+
+  // Bootstrap mode only asks the first 4 questions
+  const steps = bootstrapOnly ? allSteps.slice(0, 4) : allSteps;
 
   const currentStepDef = steps[state.currentStep];
 

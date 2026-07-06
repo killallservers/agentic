@@ -55,10 +55,32 @@ export class LLMClient {
     }
   }
 
-  async askContextualQuestions(): Promise<Record<string, string>> {
-    throw new Error(
-      "askContextualQuestions should not be called directly. Use interactive questionnaire instead.",
-    );
+  async askContextualQuestions(
+    bootstrapAnswers: Record<string, string>,
+  ): Promise<Record<string, string>> {
+    const prompt = `Based on these initial setup answers:
+${Object.entries(bootstrapAnswers)
+  .map(([k, v]) => `${k}: ${v}`)
+  .join("\n")}
+
+Generate 2-3 follow-up questions to deeply understand their specific needs:
+1. Ask about pain points specific to their team size and priority
+2. Ask about their deployment/infrastructure needs based on their stack
+3. Ask about their most pressing technical challenges
+
+Format as JSON: { "q1": "question", "q2": "question", ... }
+Keep questions concise and specific to their context.`;
+
+    const questions = await this.call([{ role: "user", content: prompt }]);
+
+    try {
+      return {
+        ...bootstrapAnswers,
+        ...JSON.parse(questions),
+      };
+    } catch {
+      return bootstrapAnswers;
+    }
   }
 
   async generateAgentContext(answers: Record<string, string>): Promise<string> {

@@ -105,9 +105,12 @@ async function continueSetup(config: SetupConfig): Promise<void> {
   ensureGitignore();
 
   console.log("📋 Quick setup questions...\n");
-  const answers = await getAnswersFromUI();
+  const bootstrapAnswers = await getBootstrapAnswersFromUI();
 
-  console.log("\n🤖 Generating personalized agent context...\n");
+  console.log("\n🤖 Generating follow-up questions...\n");
+  const answers = await client.askContextualQuestions(bootstrapAnswers);
+
+  console.log("\n✨ Generating personalized agent context...\n");
   const agentContext = await client.generateAgentContext(answers);
 
   console.log("📦 Deciding which skills to install...\n");
@@ -143,6 +146,20 @@ function getConfigFromUI(): Promise<SetupConfig> {
         onComplete: (cfg: SetupConfig) => {
           unmount();
           resolve(cfg);
+        },
+      }),
+    );
+  });
+}
+
+function getBootstrapAnswersFromUI(): Promise<Record<string, string>> {
+  return new Promise((resolve, _reject) => {
+    const { unmount } = render(
+      React.createElement(SetupQuestionnaire, {
+        bootstrapOnly: true,
+        onComplete: (answers: Record<string, string>) => {
+          unmount();
+          resolve(answers);
         },
       }),
     );
