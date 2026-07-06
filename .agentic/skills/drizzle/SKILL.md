@@ -236,6 +236,8 @@ export const auth = betterAuth({
 });
 ```
 
+For comprehensive auth setup, patterns, and best practices, see the **betterauth skill** in `.agentic/skills/betterauth/SKILL.md`.
+
 ## 1.x New Features
 
 ### Column Aliases (`.as()`)

@@ -88,6 +88,21 @@ Use when: Architecture decisions, design choices, trade-off analysis
 /judge-panel --decision "Should we migrate to Drizzle ORM?"
 ```
 
+### audit-auth-implementation.js
+
+Review authentication code for security vulnerabilities and BetterAuth pattern opportunities.
+
+```
+Pattern: Find auth files → Audit for vulnerabilities → Verify findings
+Cost: O(files × 3 verifiers)
+Use when: Security audit, auth implementation review, BetterAuth migration planning
+```
+
+**Example:** Audit auth endpoints for vulnerabilities
+```
+/audit-auth-implementation --pattern "src/**/*.ts" --severity "critical"
+```
+
 ## Quality Patterns
 
 Reusable orchestration techniques that encode best practices. Referenced in workflow templates and available in `rules/patterns-*.md`.
