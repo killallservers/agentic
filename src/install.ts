@@ -1,63 +1,73 @@
-import { copyFileSync, mkdirSync, readdirSync, statSync } from 'fs'
-import { resolve, relative, dirname } from 'path'
+import { mkdirSync, writeFileSync, statSync } from 'fs'
+import { resolve, dirname } from 'path'
 import { execSync } from 'child_process'
 import { Config } from './config'
+import { readFileSync } from 'fs'
 
-export async function installScaffolding(config: Config): Promise<void> {
-  const sourceDir = resolve('src/init')
-  const targetDir = resolve('.agentic')
+const VERSION = JSON.parse(readFileSync(resolve(import.meta.dir, '../package.json'), 'utf-8')).version
 
-  const dirsToCreate = [
-    'agents',
-    'skills',
-    'workflows',
-    'rules',
-    'rules/patterns',
-    'memory',
-  ]
+const SCAFFOLD_FILES = [
+  'README.md',
+  'AGENTS.md',
+  'ROADMAP.md',
+  'rules/default.md',
+  'rules/patterns/dedup.md',
+  'rules/patterns/judge-panel.md',
+  'rules/patterns/adversarial-verify.md',
+  'rules/patterns/phase-orchestration.md',
+  'rules/patterns/perspective-diverse.md',
+  'rules/patterns/cost-aware.md',
+  'agents/code-reviewer.md',
+  'agents/architect.md',
+  'workflows/audit-codebase.js',
+  'workflows/judge-panel.js',
+  'workflows/loop-until-converged.js',
+  'workflows/migrate-in-parallel.js',
+  'workflows/research-question.js',
+  'memory/MEMORY.md',
+  'memory/subagents_workflows.md',
+  'hooks/symlink-to-claude.sh',
+]
 
-  // Create base directories
-  dirsToCreate.forEach((dir) => {
-    mkdirSync(resolve(targetDir, dir), { recursive: true })
-  })
-
-  // Copy files from src/init to .agentic, maintaining structure
-  copyDirRecursive(sourceDir, targetDir)
-
-  console.log('✅ Scaffolding installed to .agentic/')
+async function fetchFile(path: string): Promise<string> {
+  const url = `https://raw.githubusercontent.com/killallservers/agentic/v${VERSION}/src/init/${path}`
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${path}: ${response.statusText}`)
+  }
+  return response.text()
 }
 
-function copyDirRecursive(source: string, target: string): void {
-  const entries = readdirSync(source, { withFileTypes: true })
+export async function installScaffolding(config: Config): Promise<void> {
+  const targetDir = resolve('.agentic')
 
-  for (const entry of entries) {
-    // Skip hooks directory (handled separately by symlink hook)
-    if (entry.name === 'hooks') {
+  console.log(`📥 Fetching scaffolding files (v${VERSION})...`)
+
+  for (const file of SCAFFOLD_FILES) {
+    const filePath = resolve(targetDir, file)
+    const fileDir = dirname(filePath)
+
+    // Skip if file already exists (don't overwrite user edits)
+    try {
+      statSync(filePath)
       continue
+    } catch {
+      // File doesn't exist; proceed to create it
     }
 
-    const sourcePath = resolve(source, entry.name)
-    const targetPath = resolve(target, entry.name)
+    // Create directory if it doesn't exist
+    mkdirSync(fileDir, { recursive: true })
 
-    if (entry.isDirectory()) {
-      mkdirSync(targetPath, { recursive: true })
-      copyDirRecursive(sourcePath, targetPath)
-    } else {
-      // Skip this file if target already exists (don't overwrite user edits)
-      let shouldCopy = true
-      try {
-        statSync(targetPath)
-        // File exists; skip to avoid overwriting
-        shouldCopy = false
-      } catch {
-        // File doesn't exist; copy it
-      }
-
-      if (shouldCopy) {
-        copyFileSync(sourcePath, targetPath)
-      }
+    try {
+      const content = await fetchFile(file)
+      writeFileSync(filePath, content)
+    } catch (error) {
+      console.error(`⚠️  Failed to fetch ${file}:`, error)
+      throw error
     }
   }
+
+  console.log('✅ Scaffolding installed to .agentic/')
 }
 
 export async function runSymlinkHook(): Promise<void> {
